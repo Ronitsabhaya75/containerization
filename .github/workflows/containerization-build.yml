@@ -10,6 +10,8 @@ on:
     branches:
       - main
       - release/*
+      - testing
+      - symlink-fix
 
 jobs:
   verify-signatures:

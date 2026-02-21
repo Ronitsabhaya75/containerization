@@ -1,0 +1,60 @@
+name: Test VirtioFS Autofs Stall
+on:
+  workflow_dispatch:
+    inputs:
+      containerization_branch:
+        description: 'Branch for Ronitsabhaya75/containerization'
+        required: true
+        default: 'testing'
+      container_branch:
+        description: 'Branch for Ronitsabhaya75/container'
+        required: true
+        default: 'main'
+
+jobs:
+  test-virtiofs-rm:
+    runs-on: macos-14
+    steps:
+      - name: Checkout containerization
+        uses: actions/checkout@v4
+        with:
+          repository: Ronitsabhaya75/containerization
+          ref: ${{ github.event.inputs.containerization_branch }}
+          path: containerization
+
+      - name: Checkout container
+        uses: actions/checkout@v4
+        with:
+          repository: Ronitsabhaya75/container
+          ref: ${{ github.event.inputs.container_branch }}
+          path: container
+
+      - name: Link local containerization package
+        run: |
+          cd container
+          # Point the Containerization dependency to our local checked-out branch
+          swift package edit Containerization --path ../containerization
+          
+      - name: Fetch Linux Kernel using swift-containerization target
+        run: |
+          # The container runner needs the kernel to boot
+          cd containerization
+          make fetch-default-kernel
+
+      - name: Build container CLI
+        run: |
+          cd container
+          swift build -c release
+
+      - name: Setup Host Directory
+        run: |
+          mkdir -p ~/some-dir
+          touch ~/some-dir/foo.txt
+
+      - name: Run Virtual Machine Autofs Test
+        run: |
+          cd container
+          # Create symlink and time its removal inside the guest
+          # If autofs stall is present, it will take > 5 seconds.
+          # If fixed, it will take ~0.003s.
+          .build/release/container run -v ~/some-dir:/home/user ubuntu bash -c "ln -s /home/user/foo.txt /home/user/latest && time rm /home/user/latest"
