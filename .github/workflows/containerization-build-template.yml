@@ -18,7 +18,6 @@ on:
 jobs: 
   buildAndTest: 
     name: Build and Test repo
-    if: github.repository == 'apple/containerization'
     timeout-minutes: 60
     runs-on: [self-hosted, macos, tahoe, ARM64]
     permissions:
