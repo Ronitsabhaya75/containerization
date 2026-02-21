@@ -13,7 +13,7 @@ on:
 
 jobs:
   test-virtiofs-rm:
-    runs-on: [self-hosted, macos, tahoe, ARM64]
+    runs-on: macos-14
     steps:
       - name: Checkout containerization
         uses: actions/checkout@v4
@@ -38,13 +38,11 @@ jobs:
       - name: Fetch Linux Kernel using swift-containerization target
         run: |
           # The container runner needs the kernel to boot
-          source /opt/swiftly/env.sh
           cd containerization
           make fetch-default-kernel
 
       - name: Build container CLI
         run: |
-          source /opt/swiftly/env.sh
           cd container
           swift build -c release
 
@@ -55,7 +53,6 @@ jobs:
 
       - name: Run Virtual Machine Autofs Test
         run: |
-          source /opt/swiftly/env.sh
           cd container
           # Create symlink and time its removal inside the guest
           # If autofs stall is present, it will take > 5 seconds.

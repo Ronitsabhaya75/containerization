@@ -19,7 +19,7 @@ jobs:
   buildAndTest: 
     name: Build and Test repo
     timeout-minutes: 60
-    runs-on: [self-hosted, macos, tahoe, ARM64]
+    runs-on: macos-14
     permissions:
       contents: read
       packages: write
